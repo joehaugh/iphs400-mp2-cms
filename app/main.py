@@ -1,30 +1,34 @@
 """The FastAPI application.
 
-T00 (already done): the admin console answers at /admin and the public site
-answers at /. That is the whole skeleton — it exists so you can prove the stack
-runs before you build anything on it.
-
-Add your routes in their own modules (app/routes/posts.py and so on) and include
-them here. Keep this file small.
+The admin console lives under /admin (sign-in at /login) and the public site
+preview at /. Routes live in their own modules under app/routes/ and are
+included here. Keep this file small.
 """
 from __future__ import annotations
 
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, Request
-from fastapi.templating import Jinja2Templates
+from starlette.middleware.sessions import SessionMiddleware
 
 from app import settings
+from app.db import init_db
+from app.routes import auth, console
+from app.templating import templates
 
-templates = Jinja2Templates(directory=str(settings.TEMPLATES))
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    init_db()
+    yield
 
 
 def create_app() -> FastAPI:
-    app = FastAPI(title="IPHS 400 MP2 CMS")
-
-    @app.get("/admin")
-    def admin_home(request: Request):
-        return templates.TemplateResponse(
-            request, "admin/hello.html", {"title": "Admin"}
-        )
+    app = FastAPI(title="IPHS 400 MP2 CMS", lifespan=lifespan)
+    app.add_middleware(SessionMiddleware, secret_key=settings.SECRET_KEY,
+                       same_site="lax", session_cookie="cms_session")
+    app.include_router(auth.router)
+    app.include_router(console.router)
 
     @app.get("/")
     def public_home(request: Request):
@@ -33,9 +37,7 @@ def create_app() -> FastAPI:
             {"title": settings.SITE_TITLE, "items": []},
         )
 
-    # Your ticket work plugs in here, e.g.
-    #   from app.routes import posts
-    #   app.include_router(posts.router)
+    # Later tickets: add routers to app/routes/ and include them above.
     return app
 
 
