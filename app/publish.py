@@ -1,7 +1,8 @@
 """Render the public site into site/ as plain HTML.
 
-T00 publishes a placeholder home page. As you build content types, extend
-render_site() to write one file per published item. Two rules the rubric checks:
+publish() rebuilds the whole output from the database and records when it ran.
+Layout: index.html (merged feed), schools.html, <school>/index.html and
+<school>/posts/<slug>.html. Two rules the rubric checks:
 
   1. Only PUBLISHED content is written here. A draft that reaches site/ is a bug.
   2. Every href and src is RELATIVE ("style.css", "posts/x.html"), never
@@ -10,11 +11,14 @@ render_site() to write one file per published item. Two rules the rubric checks:
 from __future__ import annotations
 
 import shutil
+import sqlite3
+from datetime import datetime, timezone
 from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from app import settings
+from app.markdown import render_markdown
 
 CSS = """/* Minimal starter styles — make them yours. */
 :root { color-scheme: light dark; }
@@ -31,17 +35,69 @@ def environment() -> Environment:
     )
 
 
-def render_site(out: Path | None = None) -> Path:
+def _write(out: Path, path: str, html: str) -> None:
+    target = out / path
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(html)
+
+
+def render_site(db: sqlite3.Connection, out: Path | None = None) -> Path:
+    """Write every published Post under `out`, from scratch."""
     out = out or settings.SITE
     if out.exists():
         shutil.rmtree(out)
     out.mkdir(parents=True)
     env = environment()
     (out / "style.css").write_text(CSS)
-    (out / "index.html").write_text(
-        env.get_template("public/home.html").render(
-            title=settings.SITE_TITLE, items=[], css_path="style.css",
-            home_path="index.html",
-        )
-    )
+
+    schools = db.execute("SELECT * FROM schools ORDER BY name").fetchall()
+    posts = db.execute(
+        "SELECT posts.*, schools.url_name AS school_url FROM posts"
+        " JOIN schools ON schools.id = posts.school_id WHERE posts.status = 'published'"
+        " ORDER BY posts.created_at DESC, posts.id DESC").fetchall()
+
+    def entry(post, prefix: str) -> dict:
+        school = next(s for s in schools if s["id"] == post["school_id"])
+        return {"title": post["title"], "school": school["short_name"],
+                "date": post["created_at"][:10],
+                "href": f"{prefix}{post['school_url']}/posts/{post['slug']}.html"}
+
+    def page(path: str, template: str, depth: int, **context) -> None:
+        root = "../" * depth
+        _write(out, path, env.get_template(template).render(
+            site_title=settings.SITE_TITLE, css_path=f"{root}style.css",
+            home_path=f"{root}index.html", schools_path=f"{root}schools.html",
+            **context))
+
+    page("index.html", "public/home.html", 0, title=settings.SITE_TITLE,
+         items=[entry(p, "") for p in posts])
+    page("schools.html", "public/schools.html", 0, title="Schools",
+         schools=[s for s in schools if not s["is_network"]])
+    for school in schools:
+        mine = [p for p in posts if p["school_id"] == school["id"]]
+        if school["is_network"] and not mine:
+            continue  # the Network School only has a page once it has Posts
+        # Inside <school>/, a Post is just posts/<slug>.html.
+        page(f"{school['url_name']}/index.html", "public/school.html", 1,
+             title=school["name"], school=school,
+             items=[{**entry(p, ""), "href": f"posts/{p['slug']}.html"} for p in mine])
+        for p in mine:
+            page(f"{school['url_name']}/posts/{p['slug']}.html", "public/post.html", 2,
+                 title=p["title"], school=school, date=p["created_at"][:10],
+                 body_html=render_markdown(p["body"]), school_path="../index.html")
     return out
+
+
+def publish(db: sqlite3.Connection, out: Path | None = None) -> Path:
+    """The Admin's Publish: render the site, then record when it happened."""
+    out = render_site(db, out)
+    db.execute("INSERT INTO meta (key, value) VALUES ('last_publish', ?)"
+               " ON CONFLICT(key) DO UPDATE SET value = excluded.value",
+               (datetime.now(timezone.utc).isoformat(timespec="seconds"),))
+    db.commit()
+    return out
+
+
+def last_publish(db: sqlite3.Connection) -> str | None:
+    row = db.execute("SELECT value FROM meta WHERE key = 'last_publish'").fetchone()
+    return row["value"] if row else None

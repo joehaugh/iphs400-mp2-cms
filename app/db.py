@@ -41,6 +41,11 @@ CREATE TABLE IF NOT EXISTS posts (
     updated_at  TEXT NOT NULL,
     UNIQUE (school_id, slug)
 );
+
+CREATE TABLE IF NOT EXISTS meta (
+    key    TEXT PRIMARY KEY,
+    value  TEXT NOT NULL
+);
 """
 
 

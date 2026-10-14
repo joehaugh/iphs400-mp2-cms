@@ -68,3 +68,10 @@ def current_user(request: Request, db: sqlite3.Connection = Depends(get_db)):
     if user["must_change_password"]:
         raise redirect_to("/change-password")
     return user
+
+
+def require_admin(user=Depends(current_user)):
+    """Dependency for Admin-only routes; an Editor gets 403."""
+    if user["role"] != "admin":
+        raise HTTPException(status_code=403, detail="Only the Admin can do this.")
+    return user

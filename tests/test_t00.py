@@ -16,16 +16,16 @@ def test_public_home_answers(client):
     assert response.status_code == 200
 
 
-def test_publish_writes_a_site(tmp_path):
+def test_publish_writes_a_site(db, tmp_path):
     from app.publish import render_site
 
-    out = render_site(tmp_path / "site")
+    out = render_site(db, tmp_path / "site")
     assert (out / "index.html").exists() and (out / "style.css").exists()
 
 
-def test_published_html_uses_relative_paths(tmp_path):
+def test_published_html_uses_relative_paths(db, tmp_path):
     """Root-absolute paths break on GitHub Pages project URLs (rubric F2)."""
     from app.publish import render_site
 
-    html = (render_site(tmp_path / "site") / "index.html").read_text()
+    html = (render_site(db, tmp_path / "site") / "index.html").read_text()
     assert 'href="/' not in html and 'src="/' not in html

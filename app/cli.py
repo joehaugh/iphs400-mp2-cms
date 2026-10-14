@@ -11,7 +11,8 @@ import subprocess
 import sys
 
 from app import settings
-from app.publish import render_site
+from app.db import connect, init_db
+from app.publish import publish
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -32,7 +33,12 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     if args.command == "publish":
-        out = render_site()
+        conn = connect()
+        try:
+            init_db(conn)
+            out = publish(conn)
+        finally:
+            conn.close()
         print(f"Wrote {out}. Preview it with:  python3 -m http.server -d {out} 8001")
         return 0
 

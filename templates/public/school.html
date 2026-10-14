@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+  <h1>{{ school.name }}</h1>
+  <p>{{ school.city }}, {{ school.state }}</p>
+  {% if items %}
+    <ul>{% for item in items %}<li><a href="{{ item.href }}">{{ item.title }}</a> <small>{{ item.date }}</small></li>{% endfor %}</ul>
+  {% else %}
+    <p>Nothing published yet.</p>
+  {% endif %}
+{% endblock %}

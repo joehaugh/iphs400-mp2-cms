@@ -2,7 +2,8 @@
 {% block content %}
   <h1>{{ title }}</h1>
   {% if items %}
-    <ul>{% for item in items %}<li><a href="{{ item.href }}">{{ item.title }}</a></li>{% endfor %}</ul>
+    <ul>{% for item in items %}<li><a href="{{ item.href }}">{{ item.title }}</a>
+      {% if item.school %}<small>{{ item.school }}{% if item.date %} · {{ item.date }}{% endif %}</small>{% endif %}</li>{% endfor %}</ul>
   {% else %}
     <p>Nothing published yet.</p>
   {% endif %}

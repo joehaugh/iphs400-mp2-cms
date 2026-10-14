@@ -6,4 +6,12 @@
     <dt>School</dt><dd>{{ user.school_name if user.school_name else "All Schools (Network)" }}</dd>
   </dl>
   <p><a href="/admin/posts">Posts</a></p>
+  {% if user.role == "admin" %}
+  <h2>Publish</h2>
+  <p>Last Publish: {{ last_publish or "never" }}. Published Posts go live only at the next Publish.</p>
+  <form method="post" action="/admin/publish">
+    {{ csrf_field(request) }}
+    <button type="submit">Publish</button>
+  </form>
+  {% endif %}
 {% endblock %}
