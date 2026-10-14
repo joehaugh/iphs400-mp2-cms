@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, Form, Request
 from fastapi.responses import RedirectResponse
 
 from app.db import get_db
-from app.passwords import hash_password, verify_password
+from app.passwords import MIN_PASSWORD_LENGTH, hash_password, verify_password
 from app.security import current_user_allow_pending, end_sessions, verify_csrf
 from app.templating import templates
 
@@ -15,7 +15,6 @@ router = APIRouter()
 
 # One message for every failure, so it never reveals which part was wrong.
 BAD_SIGN_IN = "Those sign-in details are not right. Please try again."
-MIN_PASSWORD_LENGTH = 10
 
 
 @router.get("/login")

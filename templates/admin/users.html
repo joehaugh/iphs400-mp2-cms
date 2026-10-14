@@ -1,0 +1,24 @@
+{% extends "admin/layout.html" %}
+{% block body %}
+  <h1>Users</h1>
+  <p><a href="/admin/users/new">New User</a> · <a href="/admin">Console</a></p>
+  {% if error %}<p role="alert"><strong>{{ error }}</strong></p>{% endif %}
+  <table>
+    <thead><tr><th>Email</th><th>Role</th><th>School</th><th>Active</th><th></th></tr></thead>
+    <tbody>
+    {% for u in users %}
+      <tr>
+        <td><a href="/admin/users/{{ u.id }}/edit">{{ u.email }}</a></td>
+        <td>{{ "Admin" if u.role == "admin" else "Editor" }}</td>
+        <td>{{ u.school_name or "All Schools (Network)" }}</td>
+        <td>{{ "Active" if u.active else "Deactivated" }}</td>
+        <td>{% if u.active %}
+          <form method="post" action="/admin/users/{{ u.id }}/deactivate">
+            {{ csrf_field(request) }}
+            <button type="submit">Deactivate</button>
+          </form>{% endif %}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}
