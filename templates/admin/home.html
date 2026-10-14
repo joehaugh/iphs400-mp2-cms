@@ -5,4 +5,5 @@
     <dt>Role</dt><dd>{{ "Admin" if user.role == "admin" else "Editor" }}</dd>
     <dt>School</dt><dd>{{ user.school_name if user.school_name else "All Schools (Network)" }}</dd>
   </dl>
+  <p><a href="/admin/posts">Posts</a></p>
 {% endblock %}

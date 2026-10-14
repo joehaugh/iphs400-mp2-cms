@@ -28,6 +28,19 @@ CREATE TABLE IF NOT EXISTS users (
     school_id             INTEGER REFERENCES schools(id),
     CHECK ((role = 'editor') = (school_id IS NOT NULL))
 );
+
+CREATE TABLE IF NOT EXISTS posts (
+    id          INTEGER PRIMARY KEY,
+    school_id   INTEGER NOT NULL REFERENCES schools(id),
+    title       TEXT NOT NULL,
+    slug        TEXT NOT NULL,
+    body        TEXT NOT NULL DEFAULT '',
+    status      TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'published')),
+    author_id   INTEGER NOT NULL REFERENCES users(id),
+    created_at  TEXT NOT NULL,
+    updated_at  TEXT NOT NULL,
+    UNIQUE (school_id, slug)
+);
 """
 
 

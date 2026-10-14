@@ -1,0 +1,38 @@
+{% extends "admin/layout.html" %}
+{% block body %}
+  <h1>{{ title }}</h1>
+  <p><a href="/admin/posts">Back to Posts</a></p>
+  {% if error %}<p role="alert"><strong>{{ error }}</strong></p>{% endif %}
+  <form method="post" action="{{ '/admin/posts/%d' % post.id if post else '/admin/posts' }}">
+    {{ csrf_field(request) }}
+    {% if user.role == "admin" and not post %}
+    <p><label>School
+      <select name="school_id">
+        <option value="">Choose a School…</option>
+        {% for s in schools %}
+        <option value="{{ s.id }}" {{ "selected" if values.school_id == s.id|string }}>{{ s.name }}</option>
+        {% endfor %}
+      </select></label></p>
+    {% endif %}
+    <p><label>Title <input name="title" value="{{ values.title }}" required></label></p>
+    {% if post %}
+    <p>Address: <code>{{ values.slug }}</code> <small>(fixed once the Post is created)</small></p>
+    {% else %}
+    <p><label>Address <input name="address" value="{{ values.address }}">
+      <small>Leave blank to make it from the title.</small></label></p>
+    {% endif %}
+    <p><label>Body (Markdown)<br>
+      <textarea name="body" rows="14" cols="70">{{ values.body }}</textarea></label></p>
+    <p><label>Status
+      <select name="status">
+        <option value="draft" {{ "selected" if values.status == "draft" }}>Draft</option>
+        <option value="published" {{ "selected" if values.status == "published" }}>Published (ready; goes live at the next Publish)</option>
+      </select></label></p>
+    <button type="submit">Save</button>
+    <button type="submit" formaction="{{ '/admin/posts/%d/preview' % post.id if post else '/admin/posts/preview' }}">Preview</button>
+  </form>
+  {% if preview_html is not none %}
+  <h2>Preview</h2>
+  <div>{{ preview_html | safe }}</div>
+  {% endif %}
+{% endblock %}

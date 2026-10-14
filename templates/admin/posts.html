@@ -1,0 +1,22 @@
+{% extends "admin/layout.html" %}
+{% block body %}
+  <h1>Posts</h1>
+  <p><a href="/admin/posts/new">New Post</a> · <a href="/admin">Console</a></p>
+  {% if posts %}
+  <table>
+    <thead><tr><th>Title</th>{% if user.role == "admin" %}<th>School</th>{% endif %}<th>Status</th><th>Updated</th></tr></thead>
+    <tbody>
+    {% for p in posts %}
+      <tr>
+        <td><a href="/admin/posts/{{ p.id }}/edit">{{ p.title }}</a></td>
+        {% if user.role == "admin" %}<td>{{ p.school_name }}</td>{% endif %}
+        <td>{{ "Draft" if p.status == "draft" else "Published (live at the next Publish)" }}</td>
+        <td>{{ p.updated_at }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p>No Posts yet.</p>
+  {% endif %}
+{% endblock %}
