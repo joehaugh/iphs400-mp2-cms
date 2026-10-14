@@ -35,8 +35,11 @@ def _scope(user) -> tuple[str, tuple]:
     return " AND posts.school_id = ?", (user["school_id"],)
 
 
-def list_posts(db: sqlite3.Connection, user) -> list[sqlite3.Row]:
+def list_posts(db: sqlite3.Connection, user, school_id: int | None = None) -> list[sqlite3.Row]:
+    """`school_id` narrows an Admin's list; an Editor is always held to their own School."""
     clause, params = _scope(user)
+    if school_id is not None and user["role"] == "admin":
+        clause, params = " AND posts.school_id = ?", (school_id,)
     return db.execute(
         "SELECT posts.*, schools.short_name AS school_name FROM posts"
         " JOIN schools ON schools.id = posts.school_id"
@@ -105,4 +108,23 @@ def update_post(db, post: sqlite3.Row, *, title: str, body: str, status: str) ->
     title, status = _clean(title, status)
     db.execute("UPDATE posts SET title = ?, body = ?, status = ?, updated_at = ?"
                " WHERE id = ?", (title, body, status, _now(), post["id"]))
+    db.commit()
+
+
+def set_draft(db, post: sqlite3.Row) -> None:
+    """Unpublish a Post: it leaves the public site at the next Publish."""
+    if post["status"] == "draft":
+        return  # nothing to withdraw; don't count it as a change
+    db.execute("UPDATE posts SET status = 'draft', updated_at = ? WHERE id = ?",
+               (_now(), post["id"]))
+    db.commit()
+
+
+def can_delete(user, post: sqlite3.Row) -> bool:
+    """Drafts may go for Editor or Admin; only the Admin removes published content."""
+    return user["role"] == "admin" or post["status"] == "draft"
+
+
+def delete_post(db, post: sqlite3.Row) -> None:
+    db.execute("DELETE FROM posts WHERE id = ?", (post["id"],))
     db.commit()

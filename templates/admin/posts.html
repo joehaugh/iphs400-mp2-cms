@@ -2,6 +2,18 @@
 {% block body %}
   <h1>Posts</h1>
   <p><a href="/admin/posts/new">New Post</a> · <a href="/admin">Console</a></p>
+  {% if user.role == "admin" %}
+  <form method="get" action="/admin/posts">
+    <label>School
+      <select name="school">
+        <option value="">All Schools</option>
+        {% for s in schools %}
+        <option value="{{ s.id }}" {{ "selected" if chosen_school == s.id }}>{{ s.name }}</option>
+        {% endfor %}
+      </select></label>
+    <button type="submit">Filter</button>
+  </form>
+  {% endif %}
   {% if posts %}
   <table>
     <thead><tr><th>Title</th>{% if user.role == "admin" %}<th>School</th>{% endif %}<th>Status</th><th>Updated</th></tr></thead>

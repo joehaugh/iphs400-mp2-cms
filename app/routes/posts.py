@@ -1,4 +1,4 @@
-"""Post routes: list, create, edit, preview. Requires a signed-in User."""
+"""Post routes: list, create, edit, preview, unpublish, delete. Requires a signed-in User."""
 from __future__ import annotations
 
 import sqlite3
@@ -20,6 +20,7 @@ def _form(request, db, user, *, values, post=None, error=None, preview=None, sta
         "title": "Edit Post" if post else "New Post", "user": user, "post": post,
         "values": values, "error": error, "preview_html": preview,
         "schools": store.list_schools(db) if user["role"] == "admin" else [],
+        "can_delete": bool(post) and store.can_delete(user, post),
     }, status_code=status)
 
 
@@ -31,9 +32,13 @@ def _own_or_404(db, user, post_id: int):
 
 
 @router.get("")
-def list_view(request: Request, user=Depends(current_user), db=Depends(get_db)):
+def list_view(request: Request, school: str = "", user=Depends(current_user),
+              db=Depends(get_db)):
+    chosen = int(school) if school.isdigit() else None  # anything else means no filter
     return templates.TemplateResponse(request, "admin/posts.html", {
-        "title": "Posts", "user": user, "posts": store.list_posts(db, user)})
+        "title": "Posts", "user": user, "posts": store.list_posts(db, user, chosen),
+        "schools": store.list_schools(db) if user["role"] == "admin" else [],
+        "chosen_school": chosen if user["role"] == "admin" else None})
 
 
 @router.get("/new")
@@ -87,4 +92,21 @@ def update(post_id: int, request: Request, user=Depends(current_user), db=Depend
         store.update_post(db, post, title=title, body=body, status=status)
     except store.PostError as err:
         return _form(request, db, user, post=post, values=values, error=str(err), status=400)
+    return RedirectResponse("/admin/posts", status_code=303)
+
+
+@router.post("/{post_id}/unpublish", dependencies=[Depends(verify_csrf)])
+def unpublish(post_id: int, user=Depends(current_user), db=Depends(get_db)):
+    store.set_draft(db, _own_or_404(db, user, post_id))
+    return RedirectResponse("/admin/posts", status_code=303)
+
+
+@router.post("/{post_id}/delete", dependencies=[Depends(verify_csrf)])
+def delete(post_id: int, user=Depends(current_user), db=Depends(get_db)):
+    post = _own_or_404(db, user, post_id)
+    if not store.can_delete(user, post):
+        raise HTTPException(status_code=403,
+                            detail="Only the Admin can delete a published Post. "
+                                   "Set it back to draft instead.")
+    store.delete_post(db, post)
     return RedirectResponse("/admin/posts", status_code=303)

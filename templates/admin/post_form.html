@@ -31,6 +31,21 @@
     <button type="submit">Save</button>
     <button type="submit" formaction="{{ '/admin/posts/%d/preview' % post.id if post else '/admin/posts/preview' }}">Preview</button>
   </form>
+  {% if post %}
+  {% if post.status == "published" %}
+  <form method="post" action="/admin/posts/{{ post.id }}/unpublish">
+    {{ csrf_field(request) }}
+    <button type="submit">Set back to draft</button>
+    <small>(it leaves the public site at the next Publish)</small>
+  </form>
+  {% endif %}
+  {% if can_delete %}
+  <form method="post" action="/admin/posts/{{ post.id }}/delete">
+    {{ csrf_field(request) }}
+    <button type="submit">Delete permanently</button>
+  </form>
+  {% endif %}
+  {% endif %}
   {% if preview_html is not none %}
   <h2>Preview</h2>
   <div>{{ preview_html | safe }}</div>
