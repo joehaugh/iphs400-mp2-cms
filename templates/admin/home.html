@@ -5,7 +5,27 @@
     <dt>Role</dt><dd>{{ "Admin" if user.role == "admin" else "Editor" }}</dd>
     <dt>School</dt><dd>{{ user.school_name if user.school_name else "All Schools (Network)" }}</dd>
   </dl>
-  <p><a href="/admin/posts">Posts</a> · <a href="/admin/pages">Pages</a>{% if user.role == "admin" %} · <a href="/admin/users">Users</a>{% endif %}</p>
+  <p><a href="/admin/content">All content</a> · <a href="/admin/posts">Posts</a> · <a href="/admin/pages">Pages</a>{% if user.role == "admin" %} · <a href="/admin/users">Users</a>{% endif %}</p>
+  <h2>{{ "Network" if user.role == "admin" else "Your School" }}</h2>
+  <table>
+    <thead><tr><th></th><th>Draft</th><th>Published</th></tr></thead>
+    <tbody>
+      <tr><th>Posts</th><td>{{ summary.totals.posts_draft }}</td><td>{{ summary.totals.posts_published }}</td></tr>
+      <tr><th>Pages</th><td>{{ summary.totals.pages_draft }}</td><td>{{ summary.totals.pages_published }}</td></tr>
+    </tbody>
+  </table>
+  <p>Changed since the last Publish: <strong>{{ summary.totals.changed }}</strong></p>
+  {% if user.role == "admin" %}
+  <h2>By School</h2>
+  <table>
+    <thead><tr><th>School</th><th>Draft Posts</th><th>Published Posts</th><th>Draft Pages</th><th>Published Pages</th><th>Changed</th></tr></thead>
+    <tbody>
+    {% for s in summary.by_school %}
+      <tr><td>{{ s.name }}</td><td>{{ s.posts_draft }}</td><td>{{ s.posts_published }}</td><td>{{ s.pages_draft }}</td><td>{{ s.pages_published }}</td><td>{{ s.changed }}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
   {% if user.role == "admin" %}
   <h2>Publish</h2>
   <p>Last Publish: {{ last_publish or "never" }}. Published Posts go live only at the next Publish.</p>

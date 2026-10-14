@@ -106,10 +106,10 @@ def render_site(db: sqlite3.Connection, out: Path | None = None) -> Path:
 
 def publish(db: sqlite3.Connection, out: Path | None = None) -> Path:
     """The Admin's Publish: render the site, then record when it happened."""
-    out = render_site(db, out)
+    started = datetime.now(timezone.utc).isoformat(timespec="seconds")  # before rendering, so
+    out = render_site(db, out)  # an edit made mid-render still counts as changed
     db.execute("INSERT INTO meta (key, value) VALUES ('last_publish', ?)"
-               " ON CONFLICT(key) DO UPDATE SET value = excluded.value",
-               (datetime.now(timezone.utc).isoformat(timespec="seconds"),))
+               " ON CONFLICT(key) DO UPDATE SET value = excluded.value", (started,))
     db.commit()
     return out
 

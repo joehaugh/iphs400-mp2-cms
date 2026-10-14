@@ -1,0 +1,47 @@
+{% extends "admin/layout.html" %}
+{% block body %}
+  <h1>Content</h1>
+  <p><a href="/admin">Console</a> · <a href="/admin/posts/new">New Post</a> · <a href="/admin/pages/new">New Page</a></p>
+  <form method="get" action="/admin/content">
+    <label>Status
+      <select name="status">
+        <option value="">Any</option>
+        <option value="draft" {{ "selected" if status == "draft" }}>Draft</option>
+        <option value="published" {{ "selected" if status == "published" }}>Published</option>
+      </select></label>
+    <label>Type
+      <select name="type">
+        <option value="">Posts and Pages</option>
+        <option value="post" {{ "selected" if kind == "post" }}>Posts</option>
+        <option value="page" {{ "selected" if kind == "page" }}>Pages</option>
+      </select></label>
+    {% if user.role == "admin" %}
+    <label>School
+      <select name="school">
+        <option value="">All Schools</option>
+        {% for s in schools %}
+        <option value="{{ s.id }}" {{ "selected" if chosen_school == s.id }}>{{ s.name }}</option>
+        {% endfor %}
+      </select></label>
+    {% endif %}
+    <button type="submit">Filter</button>
+  </form>
+  {% if items %}
+  <table>
+    <thead><tr><th>Type</th><th>Title</th>{% if user.role == "admin" %}<th>School</th>{% endif %}<th>Status</th><th>Updated</th></tr></thead>
+    <tbody>
+    {% for i in items %}
+      <tr>
+        <td>{{ "Post" if i.kind == "post" else "Page" }}</td>
+        <td><a href="/admin/{{ i.kind }}s/{{ i.id }}/edit">{{ i.title }}</a></td>
+        {% if user.role == "admin" %}<td>{{ i.school_name }}</td>{% endif %}
+        <td>{{ "Draft" if i.status == "draft" else "Published" }}</td>
+        <td>{{ i.updated_at }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p>Nothing matches.</p>
+  {% endif %}
+{% endblock %}
