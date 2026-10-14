@@ -5,7 +5,7 @@
     <dt>Role</dt><dd>{{ "Admin" if user.role == "admin" else "Editor" }}</dd>
     <dt>School</dt><dd>{{ user.school_name if user.school_name else "All Schools (Network)" }}</dd>
   </dl>
-  <p><a href="/admin/posts">Posts</a></p>
+  <p><a href="/admin/posts">Posts</a> · <a href="/admin/pages">Pages</a></p>
   {% if user.role == "admin" %}
   <h2>Publish</h2>
   <p>Last Publish: {{ last_publish or "never" }}. Published Posts go live only at the next Publish.</p>

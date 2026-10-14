@@ -13,7 +13,7 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from app import settings
 from app.db import init_db
-from app.routes import auth, console, posts
+from app.routes import auth, console, pages, posts
 from app.templating import templates
 
 
@@ -30,6 +30,7 @@ def create_app() -> FastAPI:
     app.include_router(auth.router)
     app.include_router(console.router)
     app.include_router(posts.router)
+    app.include_router(pages.router)
 
     @app.get("/")
     def public_home(request: Request):

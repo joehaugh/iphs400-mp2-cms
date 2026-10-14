@@ -2,6 +2,11 @@
 {% block content %}
   <h1>{{ school.name }}</h1>
   <p>{{ school.city }}, {{ school.state }}</p>
+  {% if page_items %}
+    <h2>Pages</h2>
+    <ul>{% for item in page_items %}<li><a href="{{ item.href }}">{{ item.title }}</a></li>{% endfor %}</ul>
+    <h2>Posts</h2>
+  {% endif %}
   {% if items %}
     <ul>{% for item in items %}<li><a href="{{ item.href }}">{{ item.title }}</a> <small>{{ item.date }}</small></li>{% endfor %}</ul>
   {% else %}

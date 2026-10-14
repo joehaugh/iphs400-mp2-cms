@@ -2,7 +2,7 @@
 {% block content %}
   <article>
     <h1>{{ title }}</h1>
-    <p><small><a href="{{ school_path }}">{{ school.short_name }}</a> · {{ date }}</small></p>
+    <p><small><a href="{{ school_path }}">{{ school.short_name }}</a>{% if date %} · {{ date }}{% endif %}</small></p>
     {{ body_html | safe }}
   </article>
 {% endblock %}

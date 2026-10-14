@@ -56,14 +56,14 @@ def list_schools(db: sqlite3.Connection) -> list[sqlite3.Row]:
     return db.execute("SELECT id, name FROM schools ORDER BY is_network DESC, name").fetchall()
 
 
-def target_school_id(db: sqlite3.Connection, user, chosen: str) -> int:
+def target_school_id(db: sqlite3.Connection, user, chosen: str, noun: str = "Post") -> int:
     """The Editor's own School; for an Admin, the School they explicitly chose."""
     if user["role"] != "admin":
         return user["school_id"]
     if chosen.isdigit() and db.execute(
             "SELECT 1 FROM schools WHERE id = ?", (int(chosen),)).fetchone():
         return int(chosen)
-    raise PostError("Choose which School this Post belongs to.")
+    raise PostError(f"Choose which School this {noun} belongs to.")
 
 
 def _clean(title: str, status: str) -> tuple[str, str]:

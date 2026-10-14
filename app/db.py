@@ -42,6 +42,20 @@ CREATE TABLE IF NOT EXISTS posts (
     UNIQUE (school_id, slug)
 );
 
+CREATE TABLE IF NOT EXISTS pages (
+    id          INTEGER PRIMARY KEY,
+    school_id   INTEGER NOT NULL REFERENCES schools(id),
+    title       TEXT NOT NULL,
+    slug        TEXT NOT NULL,
+    body        TEXT NOT NULL DEFAULT '',
+    status      TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'published')),
+    pin_order   INTEGER,  -- Network School Pages only: position in the navigation
+    author_id   INTEGER NOT NULL REFERENCES users(id),
+    created_at  TEXT NOT NULL,
+    updated_at  TEXT NOT NULL,
+    UNIQUE (school_id, slug)
+);
+
 CREATE TABLE IF NOT EXISTS meta (
     key    TEXT PRIMARY KEY,
     value  TEXT NOT NULL

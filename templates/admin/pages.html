@@ -1,0 +1,34 @@
+{% extends "admin/layout.html" %}
+{% block body %}
+  <h1>Pages</h1>
+  <p><a href="/admin/pages/new">New Page</a> · <a href="/admin">Console</a></p>
+  {% if user.role == "admin" %}
+  <form method="get" action="/admin/pages">
+    <label>School
+      <select name="school">
+        <option value="">All Schools</option>
+        {% for s in schools %}
+        <option value="{{ s.id }}" {{ "selected" if chosen_school == s.id }}>{{ s.name }}</option>
+        {% endfor %}
+      </select></label>
+    <button type="submit">Filter</button>
+  </form>
+  {% endif %}
+  {% if pages %}
+  <table>
+    <thead><tr><th>Title</th>{% if user.role == "admin" %}<th>School</th>{% endif %}<th>Status</th><th>Updated</th></tr></thead>
+    <tbody>
+    {% for p in pages %}
+      <tr>
+        <td><a href="/admin/pages/{{ p.id }}/edit">{{ p.title }}</a></td>
+        {% if user.role == "admin" %}<td>{{ p.school_name }}</td>{% endif %}
+        <td>{{ "Draft" if p.status == "draft" else "Published (live at the next Publish)" }}</td>
+        <td>{{ p.updated_at }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p>No Pages yet.</p>
+  {% endif %}
+{% endblock %}
