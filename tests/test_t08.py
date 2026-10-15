@@ -1,5 +1,6 @@
 """T08: end-to-end proof of the hard constraints across the whole site."""
 import re
+from urllib.parse import urljoin
 from urllib.parse import urlsplit
 
 from app.main import create_app
@@ -160,3 +161,24 @@ def test_every_form_that_posts_carries_a_csrf_token_on_every_console_page(client
                 assert 'method="post"' in attrs, f"{path}: form without method=post: {attrs}"
                 assert 'name="csrf_token"' in inner, f"{path}: form {attrs} lacks a CSRF token"
     assert forms_seen > 30
+
+
+def test_every_link_on_every_console_page_leads_somewhere(client_as, csrf, db):
+    """The console's links are relative (no href starts with "/"); each must still resolve."""
+    editor, admin = client_as("editor"), client_as("admin")
+    create(editor, csrf, title="Live", status="published")
+    make(editor, csrf, title="Live Page", status="published")
+    pages = console_pages(db) + [
+        f"/admin/posts/{r['id']}/edit" for r in db.execute("SELECT id FROM posts")] + [
+        f"/admin/pages/{r['id']}/edit" for r in db.execute("SELECT id FROM pages")] + [
+        "/admin/users?x=1", "/admin/content?status=draft"]
+    followed = 0
+    for path in pages:
+        html = admin.get(path).text
+        for ref in re.findall(r'<a [^>]*href="([^"]*)"', html):
+            assert not ref.startswith("/"), f"{path}: root-absolute link {ref}"
+            target = urljoin(f"http://testserver{path}", ref)
+            response = admin.get(target, follow_redirects=False)
+            assert response.status_code == 200, f"{path} -> {ref} resolved to {target}: {response.status_code}"
+            followed += 1
+    assert followed > 40

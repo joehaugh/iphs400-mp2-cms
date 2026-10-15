@@ -128,7 +128,8 @@ def test_editor_is_refused_every_user_management_route(client_as, csrf, db):
         assert r.status_code == 403, path
     assert user_row(db, DEMO_USERS["editor_b"]["email"])["active"] == 1
     assert user_row(db, "x@example.test") is None
-    assert "/admin/users" not in e.get("/admin").text
+    assert "Users</a>" not in e.get("/admin").text
+    assert "Users</a>" in client_as("admin").get("/admin").text  # so the check above can fail
 
 
 def test_visitor_is_sent_to_sign_in_and_forms_need_csrf(client, client_as, db):

@@ -1,7 +1,7 @@
 {% extends "admin/layout.html" %}
 {% block body %}
   <h1>Content</h1>
-  <p><a href="/admin">Console</a> · <a href="/admin/posts/new">New Post</a> · <a href="/admin/pages/new">New Page</a></p>
+  <p><a href="{{ rel(request, '/admin') }}">Console</a> · <a href="{{ rel(request, '/admin/posts/new') }}">New Post</a> · <a href="{{ rel(request, '/admin/pages/new') }}">New Page</a></p>
   <form method="get" action="/admin/content">
     <label>Status
       <select name="status">
@@ -33,7 +33,7 @@
     {% for i in items %}
       <tr>
         <td>{{ "Post" if i.kind == "post" else "Page" }}</td>
-        <td><a href="/admin/{{ i.kind }}s/{{ i.id }}/edit">{{ i.title }}</a></td>
+        <td><a href="{{ rel(request, '/admin/' ~ i.kind ~ 's/' ~ i.id ~ '/edit') }}">{{ i.title }}</a></td>
         {% if user.role == "admin" %}<td>{{ i.school_name }}</td>{% endif %}
         <td>{{ "Draft" if i.status == "draft" else "Published" }}</td>
         <td>{{ i.updated_at }}</td>

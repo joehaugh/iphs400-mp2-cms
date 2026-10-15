@@ -1,7 +1,7 @@
 {% extends "admin/layout.html" %}
 {% block body %}
   <h1>{{ title }}</h1>
-  <p><a href="/admin/posts">Back to Posts</a></p>
+  <p><a href="{{ rel(request, '/admin/posts') }}">Back to Posts</a></p>
   {% if error %}<p role="alert"><strong>{{ error }}</strong></p>{% endif %}
   <form method="post" action="{{ '/admin/posts/%d' % post.id if post else '/admin/posts' }}">
     {{ csrf_field(request) }}

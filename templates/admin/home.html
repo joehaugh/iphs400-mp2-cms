@@ -5,7 +5,7 @@
     <dt>Role</dt><dd>{{ "Admin" if user.role == "admin" else "Editor" }}</dd>
     <dt>School</dt><dd>{{ user.school_name if user.school_name else "All Schools (Network)" }}</dd>
   </dl>
-  <p><a href="/admin/content">All content</a> · <a href="/admin/posts">Posts</a> · <a href="/admin/pages">Pages</a>{% if user.role == "admin" %} · <a href="/admin/users">Users</a>{% endif %}</p>
+  <p><a href="{{ rel(request, '/admin/content') }}">All content</a> · <a href="{{ rel(request, '/admin/posts') }}">Posts</a> · <a href="{{ rel(request, '/admin/pages') }}">Pages</a>{% if user.role == "admin" %} · <a href="{{ rel(request, '/admin/users') }}">Users</a>{% endif %}</p>
   <h2>{{ "Network" if user.role == "admin" else "Your School" }}</h2>
   <table>
     <thead><tr><th></th><th>Draft</th><th>Published</th></tr></thead>

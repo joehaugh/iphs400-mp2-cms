@@ -1,5 +1,6 @@
 """T07: Dashboards and filters (HTTP seam)."""
 import re
+from urllib.parse import urljoin
 
 from app.publish import publish
 from tests.test_t02 import create
@@ -83,7 +84,10 @@ def test_content_list_filters_by_status_and_type(client_as, csrf):
 def test_content_links_open_the_right_editor(client_as, csrf, db):
     a, _ = seed_content(client_as, csrf)
     html = a.get("/admin/content").text
-    for path in re.findall(r'href="(/admin/(?:posts|pages)/\d+/edit)"', html):
+    links = re.findall(r'href="([^"]*/edit)"', html)
+    assert len(links) == 3  # the Editor's two Posts and one Page
+    for link in links:
+        path = urljoin("http://testserver/admin/content", link)  # resolve like a browser
         assert a.get(path).status_code == 200, path
 
 

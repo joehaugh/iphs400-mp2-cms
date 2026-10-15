@@ -1,7 +1,7 @@
 {% extends "admin/layout.html" %}
 {% block body %}
   <h1>Posts</h1>
-  <p><a href="/admin/posts/new">New Post</a> · <a href="/admin">Console</a></p>
+  <p><a href="{{ rel(request, '/admin/posts/new') }}">New Post</a> · <a href="{{ rel(request, '/admin') }}">Console</a></p>
   {% if user.role == "admin" %}
   <form method="get" action="/admin/posts">
     <label>School
@@ -20,7 +20,7 @@
     <tbody>
     {% for p in posts %}
       <tr>
-        <td><a href="/admin/posts/{{ p.id }}/edit">{{ p.title }}</a></td>
+        <td><a href="{{ rel(request, '/admin/posts/' ~ p.id ~ '/edit') }}">{{ p.title }}</a></td>
         {% if user.role == "admin" %}<td>{{ p.school_name }}</td>{% endif %}
         <td>{{ "Draft" if p.status == "draft" else "Published (live at the next Publish)" }}</td>
         <td>{{ p.updated_at }}</td>

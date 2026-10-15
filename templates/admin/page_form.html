@@ -1,7 +1,7 @@
 {% extends "admin/layout.html" %}
 {% block body %}
   <h1>{{ title }}</h1>
-  <p><a href="/admin/pages">Back to Pages</a></p>
+  <p><a href="{{ rel(request, '/admin/pages') }}">Back to Pages</a></p>
   {% if error %}<p role="alert"><strong>{{ error }}</strong></p>{% endif %}
   <form method="post" action="{{ '/admin/pages/%d' % page.id if page else '/admin/pages' }}">
     {{ csrf_field(request) }}
