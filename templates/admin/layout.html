@@ -1,5 +1,16 @@
 {% extends "base.html" %}
 {% set home_path = rel(request, "/admin") %}
+{% block head %}
+  <style>
+    /* Console only: keep every screen inside a phone-width window. Wide tables scroll
+       inside themselves instead of stretching the page. */
+    body { margin: 0 auto; max-width: 64rem; padding: 0 .75rem; }
+    table { display: block; max-width: 100%; overflow-x: auto; }
+    input, select, textarea { max-width: 100%; box-sizing: border-box; }
+    textarea { width: 100%; }
+    code { overflow-wrap: anywhere; }
+  </style>
+{% endblock %}
 {% block content %}
   <div>
     Signed in as {{ user.email }}
