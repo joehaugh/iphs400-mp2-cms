@@ -28,7 +28,7 @@ ENV_FOR = {
 
 def main() -> int:
     from app.db import connect, init_db
-    from app.seed import seed
+    from app.seed import SCHOOLS, seed
 
     passwords = {key: os.environ.get(var) for key, var in ENV_FOR.items()}
     missing = [ENV_FOR[k] for k, v in passwords.items() if not v]
@@ -40,7 +40,8 @@ def main() -> int:
     init_db(conn)
     seed(conn, passwords)
     conn.close()
-    print("Seeded Schools, the Network School, an Admin, and two Editors.")
+    print(f"Seeded {sum(1 for s in SCHOOLS if not s[5])} made-up Schools, the Network School, "
+          "an Admin, and two Editors.")
     return 0
 
 

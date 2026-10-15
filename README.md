@@ -17,6 +17,29 @@ cp .env.example .env
 uv run cms serve        # then open http://localhost:8000/admin  -> "T00: hello admin"
 ```
 
+## Content goes live only at the next Publish
+
+Setting a Post or Page to **Published** means "ready", not "live". Nothing reaches
+the public site until the Admin presses **Publish** (or runs `uv run cms publish`),
+which rebuilds `site/` from scratch for every School at once:
+
+- Only Published content is written. Drafts never leave the database.
+- Editing a published item changes the stored copy straight away, but the public
+  site shows the old version until the next Publish.
+- Setting an item back to draft, or the Admin deleting it, removes it from the public
+  site at the next Publish too. Old links to it will then break.
+- The console dashboard shows how many items have changed since the last Publish.
+
+The admin console runs only on your own computer. `site/` is generated: never edit it by hand.
+
+## Demo data
+
+```bash
+uv run python scripts/seed_demo.py   # 60 made-up Schools, the Network School, an Admin, two Editors
+```
+
+Passwords come from `.env` (copy `.env.example`). The Schools are placeholders; the real list comes from the client.
+
 ## What is here
 
 ```text
