@@ -114,3 +114,78 @@ def seed(conn: sqlite3.Connection, passwords: dict[str, str]) -> None:
             " VALUES (?, ?, ?, ?)",
             (email, hash_password(passwords[key]), role, school["id"] if school else None))
     conn.commit()
+
+
+# Demo content: made-up placeholder text. school url_name -> items. Posts and Pages each
+# carry a Status so the demo shows drafts staying out of the public site.
+DEMO_POSTS = [
+    ("st-ignatius", "Spring service week begins", "published",
+     "Students from **St. Ignatius** spent the week on service projects across Springfield.\n\n"
+     "- Food pantry shifts\n- A river clean-up\n- Tutoring at the elementary school"),
+    ("st-ignatius", "Alumni breakfast: save the date", "published",
+     "The annual alumni breakfast returns in May. Watch this page for details."),
+    ("st-ignatius", "Draft: scholarship announcement", "draft",
+     "Not ready yet. Waiting on the committee's final numbers."),
+    ("loyola-riverton", "Robotics team heads to nationals", "published",
+     "The Riverton robotics team qualified after a strong regional showing. "
+     "Read more at [the league site](https://example.org/robotics)."),
+    ("loyola-riverton", "New library wing opens", "published",
+     "The new wing adds quiet study rooms and a maker space."),
+    ("xavier-lakeside", "Lakeside choir wins regional award", "published",
+     "Congratulations to the choir on a **first-place** finish."),
+    ("campion", "Draft: fall retreat recap", "draft", "Notes still being collected."),
+    ("aloysius-millbrook", "Welcome to the Network", "published",
+     "Aloysius Preparatory School is glad to join the Jesuit Schools Network."),
+]
+DEMO_PAGES = [
+    # school, title, status, pin_order (Network School only), body
+    ("network", "About", "published", 1,
+     "The Jesuit Schools Network connects member high schools and their alumni.\n\n"
+     "This site gathers news from every School in one place."),
+    ("network", "How to join", "published", 2,
+     "Schools interested in joining the Network should contact the director's office."),
+    ("network", "Annual report", "draft", None, "Draft. Not for the public site yet."),
+    ("st-ignatius", "Visiting St. Ignatius", "published", None,
+     "Campus tours are held on weekday mornings. Please check in at the front office."),
+    ("st-ignatius", "Alumni contacts", "published", None, "Reach the alumni office by phone or mail."),
+    ("st-ignatius", "Draft: campaign page", "draft", None, "Not ready yet."),
+    ("loyola-riverton", "About Loyola Riverton", "published", None,
+     "Loyola Academy of Riverton has served the community for generations."),
+]
+
+
+def seed_demo_content(conn: sqlite3.Connection) -> tuple[int, int]:
+    """Add demo Posts and Pages. Safe to run twice: existing titles are skipped.
+
+    Needs the seeded Schools and Users. Returns (posts added, pages added).
+    """
+    from app import pages, posts
+
+    admin = conn.execute("SELECT * FROM users WHERE role = 'admin' ORDER BY id").fetchone()
+    added = [0, 0]
+
+    def author(school_id: int):
+        editor = conn.execute("SELECT * FROM users WHERE school_id = ? AND active = 1",
+                              (school_id,)).fetchone()
+        return editor or admin
+
+    def school(url_name: str) -> int:
+        return conn.execute("SELECT id FROM schools WHERE url_name = ?", (url_name,)).fetchone()[0]
+
+    for url_name, title, status, body in DEMO_POSTS:
+        sid = school(url_name)
+        if conn.execute("SELECT 1 FROM posts WHERE school_id = ? AND title = ?",
+                        (sid, title)).fetchone():
+            continue
+        posts.create_post(conn, author(sid), school_id=sid, title=title, body=body,
+                          status=status, address="")
+        added[0] += 1
+    for url_name, title, status, pin, body in DEMO_PAGES:
+        sid = school(url_name)
+        if conn.execute("SELECT 1 FROM pages WHERE school_id = ? AND title = ?",
+                        (sid, title)).fetchone():
+            continue
+        pages.create_page(conn, author(sid), school_id=sid, title=title, body=body,
+                          status=status, address="", pin_order="" if pin is None else str(pin))
+        added[1] += 1
+    return added[0], added[1]
