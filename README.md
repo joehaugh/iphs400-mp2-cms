@@ -9,6 +9,13 @@ Do not fork: a fork arrives without an Issues tab, and your tickets live in Issu
 2. `docs/mp2-grading-rubric_20260922.md` — how you are graded. Read it **before** you build.
 3. `docs/mp2-setup_context-threshold-hook_20260922.md` — Exercise A, in Part 4 of the manual.
 
+## Live URL
+
+https://joehaugh.github.io/iphs400-mp2-cms/
+
+The public site, built by Publish and served from the `gh-pages` branch on GitHub Pages.
+The admin console is not on the internet: it runs only on your own computer.
+
 ## Run locally
 
 ```bash
