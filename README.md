@@ -20,9 +20,17 @@ The admin console is not on the internet: it runs only on your own computer.
 
 ```bash
 uv sync
-cp .env.example .env
-uv run cms serve        # then open http://localhost:8000/admin  -> "T00: hello admin"
+cp .env.example .env                                  # then change the passwords in .env
+uv run --env-file .env python scripts/seed_demo.py    # 60 made-up Schools, demo Posts and Pages, 3 users
+uv run --env-file .env cms serve                      # the admin console, on your computer only
 ```
+
+Open http://localhost:8000/login and sign in as `admin@example.test` (or `editor@example.test`)
+with the matching password from `.env`. Press **Publish** on the Console page to build `site/`, then
+preview it with `python3 -m http.server -d site 8001` and open http://localhost:8001.
+
+The app reads settings from the environment, not from `.env` itself, so run the commands with
+`--env-file .env` as shown.
 
 ## Content goes live only at the next Publish
 
