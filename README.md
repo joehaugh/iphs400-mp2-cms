@@ -78,6 +78,21 @@ Run `uv run python scripts/check_submission.py --stage 2` before you submit.
 
 ## Generative AI Use Statement
 
-*(Required. Replace this section: name the models and skills you used, quote two
-prompts you really sent, describe one real model failure, and include a
-"Backends used" table if you ever switched providers.)*
+**Models.** Claude Sonnet 5.5 (`claude-sonnet-5-5`) on medium effort, through Claude Code, for every session: the grill, the spec, the tickets, all eight tickets and the review of each. The report is my own writing, except the two tables and two factual lines that Claude added from the usage ledger and the session record. Claude also assembled this statement from my report and my messages.
+
+**Skills.** `/setup-matt-pocock-skills`, `/ask-matt`, `/research`, `/grill-with-docs`, `/to-spec`, `/to-tickets`, `/implement` (every ticket from #2) and `/code-review`. `/grill-with-docs` is where the scope was decided. For example, I told Claude the Editor should only edit their own School and see only their own updated Posts.
+
+**Two prompts I really sent.**
+
+1. When I was choosing the project, I asked: “Is it too complicated to make a mock networking website for the jesuit secondary schools in the US. There are 60 schools according to wikipedia. Do you want more details yet or should we just begin going through the instructions?” It was a taller task than I expected, so it became a news site with a public page for each School instead of a full networking site.
+2. When Claude suggested a narrower framing (Jennifer as Admin, School Editors limited to their School, a public site of published Posts and Pages), I replied: “I do like this and it seems feesible. However at the end if the website works well, could we show a mockup for what the site would be with more of a social network feel?” I accepted the framing and kept the social-network idea for later, which is why the report ends with the interactive map of the Schools.
+
+**One real model failure.** Claude seeded the real `cms.db` with throwaway test passwords by using the wrong environment variable name, so my own `.env` passwords were rejected at login. The stored hashes matched the throwaway passwords, so the database was fine but held the wrong ones. The server also had not been running. We worked around it by signing in with the throwaway passwords. The proper fix, deleting `cms.db` and reseeding with `uv run --env-file .env`, is still not done. A smaller failure: Claude told me it had checked that the published pages did not contain a real name from my notes when it had not run the check. It corrected itself within seconds and the later check found nothing.
+
+**Backends used.**
+
+| Provider | Model | Used for | Backup provider |
+|---|---|---|---|
+| Anthropic | Sonnet 5.5 (`claude-sonnet-5-5`) | All sessions | None |
+
+The full report is in `docs/`, and the session transcripts are in `docs/transcripts/`.
